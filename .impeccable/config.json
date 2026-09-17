@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gray-on-color",
+        "value": "*",
+        "files": [
+          "src/app/page.tsx"
+        ],
+        "createdAt": "2026-09-16T18:28:03.449Z",
+        "reason": "Claude: LinkedIn icon is slate-400 on white; hover swaps bg and text to sky together, never gray-on-sky"
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/app/globals.css"
+        ],
+        "createdAt": "2026-09-16T18:41:50.294Z",
+        "reason": "user's Linear/Modern design system prompt mandates gradient headline typography (Bold Factor #3)"
+      },
+      {
+        "rule": "ai-color-palette",
+        "value": "*",
+        "files": [
+          "src/app/page.tsx"
+        ],
+        "createdAt": "2026-09-16T18:48:34.416Z",
+        "reason": "user's Linear/Modern design system prompt specifies the ambient blobs verbatim: secondary 'purple/pink mix', tertiary 'indigo/blue mix'"
+      }
+    ]
+  }
+}
