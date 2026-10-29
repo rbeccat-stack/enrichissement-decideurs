@@ -268,7 +268,7 @@ export default function Page() {
           role="alert"
           className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-[max(1rem,env(safe-area-inset-top))]"
         >
-          <div className="flex w-full max-w-2xl animate-fade-up items-start gap-3 rounded-xl border border-orange-200 border-l-4 border-l-orange bg-white px-4 py-3 text-sm text-fg-body shadow-card">
+          <div className="flex w-full max-w-2xl animate-fade-up items-start gap-3 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-fg-body shadow-card">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-danger" />
             <div className="min-w-0 flex-1">
               <p className="font-semibold text-fg">La requête a échoué</p>
