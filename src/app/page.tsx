@@ -5,7 +5,6 @@ import {
   useRef,
   useState,
   type FormEvent,
-  type MouseEvent,
   type ReactNode,
 } from "react";
 import {
@@ -17,7 +16,6 @@ import {
   Mail,
   Monitor,
   Search,
-  Sparkles,
   Users,
   X,
 } from "lucide-react";
@@ -69,32 +67,21 @@ type EmailQuality = { label: string; dot: string; text: string };
 function getEmailQuality(result?: string | null): EmailQuality {
   const value = (result ?? "").toLowerCase();
   if (value.includes("safe")) {
-    return {
-      label: "Safe to Send",
-      dot: "bg-success shadow-[0_0_8px_rgba(74,222,128,0.6)]",
-      text: "text-success",
-    };
+    return { label: "Safe to Send", dot: "bg-success", text: "text-success" };
   }
   if (value.includes("risky") || value.includes("catch") || value.includes("unknown")) {
-    return { label: result || "À vérifier", dot: "bg-warning", text: "text-warning" };
+    return { label: result || "À vérifier", dot: "bg-yellow", text: "text-warning" };
   }
   if (value.includes("invalid") || value.includes("undeliverable") || value.includes("bounce")) {
     return { label: result || "Invalide", dot: "bg-danger", text: "text-danger" };
   }
-  return { label: result || "Non testé", dot: "bg-fg-muted/60", text: "text-fg-muted" };
+  return { label: result || "Non testé", dot: "bg-fg-muted/50", text: "text-fg-muted" };
 }
 
 function initials(first?: string | null, last?: string | null) {
   const f = (first ?? "").trim().charAt(0);
   const l = (last ?? "").trim().charAt(0);
   return (f + l).toUpperCase() || "?";
-}
-
-/** Spotlight : positionne le halo radial sous le curseur via des variables CSS. */
-function trackSpotlight(e: MouseEvent<HTMLElement>) {
-  const rect = e.currentTarget.getBoundingClientRect();
-  e.currentTarget.style.setProperty("--spot-x", `${e.clientX - rect.left}px`);
-  e.currentTarget.style.setProperty("--spot-y", `${e.clientY - rect.top}px`);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -151,10 +138,10 @@ export default function Page() {
 
   const inputTone =
     siren.length === 0
-      ? "border-white/10 focus:border-accent focus:shadow-[0_0_0_3px_rgba(94,106,210,0.25)]"
+      ? "border-blue-200 focus:border-blue focus:shadow-[0_0_0_3px_var(--color-blue-100)]"
       : isSirenValid
-        ? "border-success/60 focus:border-success focus:shadow-[0_0_0_3px_rgba(74,222,128,0.2)]"
-        : "border-danger/60 focus:border-danger focus:shadow-[0_0_0_3px_rgba(248,113,113,0.2)]";
+        ? "border-success/50 focus:border-success focus:shadow-[0_0_0_3px_rgba(21,128,61,0.15)]"
+        : "border-danger/50 focus:border-danger focus:shadow-[0_0_0_3px_var(--color-orange-50)]";
 
   /* ------------------------------ Submission ------------------------------- */
 
@@ -272,7 +259,7 @@ export default function Page() {
   /* -------------------------------- Render --------------------------------- */
 
   return (
-    <main className="relative flex-1 overflow-x-clip">
+    <main className="relative isolate flex-1 overflow-x-clip">
       <AmbientBackground />
 
       {/* ---------------------------- Error banner --------------------------- */}
@@ -281,17 +268,17 @@ export default function Page() {
           role="alert"
           className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-[max(1rem,env(safe-area-inset-top))]"
         >
-          <div className="flex w-full max-w-2xl animate-fade-up items-start gap-3 rounded-xl border border-danger/30 bg-[#1a0c0e]/90 px-4 py-3 text-sm text-fg shadow-[0_0_0_1px_rgba(248,113,113,0.15),0_8px_40px_rgba(0,0,0,0.6),0_0_60px_rgba(248,113,113,0.12)] backdrop-blur-xl">
+          <div className="flex w-full max-w-2xl animate-fade-up items-start gap-3 rounded-xl border border-orange-200 border-l-4 border-l-orange bg-white px-4 py-3 text-sm text-fg-body shadow-card">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-danger" />
             <div className="min-w-0 flex-1">
-              <p className="font-semibold">La requête a échoué</p>
+              <p className="font-semibold text-fg">La requête a échoué</p>
               <p className="mt-0.5 break-words text-fg-muted">{error}</p>
             </div>
             <button
               type="button"
               onClick={() => setError(null)}
               aria-label="Fermer l'alerte"
-              className="rounded-md p-1 text-fg-muted transition duration-200 hover:bg-white/[0.06] hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+              className="rounded-md p-1 text-fg-muted transition duration-200 hover:bg-blue-50 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue"
             >
               <X className="h-4 w-4" />
             </button>
@@ -305,15 +292,14 @@ export default function Page() {
           ref={heroRef}
           className="mx-auto max-w-2xl text-center will-change-transform"
         >
-          <span className="inline-flex animate-fade-up items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-fg-subtle shadow-inset-highlight">
-            <Sparkles className="h-3 w-3 text-accent-bright" />
+          <span className="inline-flex animate-fade-up items-center gap-2 rounded-full bg-blue-50 px-3.5 py-1 text-xs font-medium text-blue-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-orange" />
             Societeinfo × Make
           </span>
           <h1
-            className="mt-5 animate-fade-up text-balance text-[clamp(2.125rem,3vw+1.25rem,4rem)] font-semibold leading-[1.05] tracking-[-0.03em] [animation-delay:80ms]"
+            className="mt-5 animate-fade-up text-balance text-[clamp(2.25rem,3vw+1.25rem,4rem)] font-semibold leading-[1.15] text-navy [animation-delay:80ms]"
           >
-            <span className="text-gradient-fg">Enrichissement</span>{" "}
-            <span className="text-gradient-accent animate-shimmer">Décideurs</span>
+            Enrichissement <span className="text-orange">Décideurs</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl animate-fade-up text-pretty text-[clamp(0.95rem,0.5vw+0.8rem,1.125rem)] leading-relaxed text-fg-muted [animation-delay:160ms]">
             Saisissez un SIREN pour obtenir instantanément les contacts
@@ -325,22 +311,17 @@ export default function Page() {
         {/* ------------------------------ Form card --------------------------- */}
         <form
           onSubmit={handleSubmit}
-          onMouseMove={trackSpotlight}
-          className="group/form relative mx-auto mt-10 max-w-2xl animate-scale-in overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card [animation-delay:240ms] sm:mt-12 sm:p-7"
+          className="relative mx-auto mt-10 max-w-2xl animate-scale-in rounded-xl border border-border bg-surface p-5 shadow-card [animation-delay:240ms] sm:mt-12 sm:p-8"
         >
-          {/* Liseré lumineux en haut + spotlight curseur */}
-          <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-          <span className="pointer-events-none absolute inset-0 bg-spotlight opacity-0 transition-opacity duration-300 group-hover/form:opacity-100" />
-
           <div className="relative">
             <label
               htmlFor="siren"
-              className="block font-mono text-[11px] uppercase tracking-widest text-fg-muted"
+              className="block text-sm font-medium text-fg"
             >
               Numéro SIREN
             </label>
-            <div className="relative mt-2.5">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-fg-muted" />
+            <div className="relative mt-2">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-blue" />
               <input
                 id="siren"
                 name="siren"
@@ -352,10 +333,10 @@ export default function Page() {
                 onChange={(e) => handleSirenChange(e.target.value)}
                 disabled={isLoading}
                 aria-invalid={siren.length > 0 && !isSirenValid}
-                className={`w-full min-w-0 rounded-lg border bg-bg-input py-3.5 pl-12 pr-16 font-mono text-[clamp(1rem,0.4vw+0.9rem,1.125rem)] tracking-[0.18em] text-fg shadow-input transition duration-200 ease-expo placeholder:tracking-[0.18em] placeholder:text-fg-muted/50 focus:outline-none disabled:opacity-60 ${inputTone}`}
+                className={`w-full min-w-0 rounded-lg border bg-bg-input py-3.5 pl-12 pr-16 text-[clamp(1rem,0.4vw+0.9rem,1.125rem)] font-medium tabular-nums tracking-[0.18em] text-fg transition duration-200 ease-expo placeholder:font-normal placeholder:tracking-[0.18em] placeholder:text-fg-muted/50 focus:outline-none disabled:bg-bg-soft disabled:opacity-70 ${inputTone}`}
               />
               <span
-                className={`pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-mono text-xs tabular-nums transition-colors duration-200 ${
+                className={`pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium tabular-nums transition-colors duration-200 ${
                   siren.length === 0
                     ? "text-fg-muted"
                     : isSirenValid
@@ -378,12 +359,12 @@ export default function Page() {
 
             {/* Toggle format */}
             <fieldset className="mt-6">
-              <legend className="font-mono text-[11px] uppercase tracking-widest text-fg-muted">
+              <legend className="text-sm font-medium text-fg">
                 Format de sortie
               </legend>
               <div
                 role="radiogroup"
-                className="mt-2.5 grid grid-cols-1 gap-1 rounded-lg border border-border bg-black/40 p-1 shadow-inset-highlight min-[360px]:grid-cols-2"
+                className="mt-2 grid grid-cols-1 gap-1 rounded-lg bg-blue-50 p-1 min-[360px]:grid-cols-2"
               >
                 <FormatOption
                   active={format === "ui"}
@@ -405,7 +386,7 @@ export default function Page() {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="btn-shine mt-7 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-5 py-3.5 text-sm font-semibold text-white shadow-cta transition duration-200 ease-expo hover:bg-accent-bright hover:shadow-cta-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-fg-muted disabled:shadow-inset-highlight"
+              className="btn-invox mt-8 inline-flex w-[calc(100%-5px)] items-center justify-center gap-2 px-5 py-3.5 text-[0.95rem] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2"
             >
               {isLoading ? (
                 <>
@@ -425,8 +406,8 @@ export default function Page() {
               )}
             </button>
             <p
-              className={`mt-3 text-center text-xs transition-colors duration-300 ${
-                isLoading ? "animate-pulse-glow text-fg-subtle" : "text-fg-muted/80"
+              className={`mt-4 text-center text-xs transition-colors duration-300 ${
+                isLoading ? "animate-pulse-soft text-blue-700" : "text-fg-muted"
               }`}
             >
               Extraction en temps réel — comptez 10 à 15 secondes.
@@ -445,11 +426,11 @@ export default function Page() {
           )}
 
           {search.status === "downloaded" && (
-            <div className="mx-auto flex max-w-2xl animate-fade-up items-center gap-3 rounded-xl border border-success/20 bg-success/[0.06] px-4 py-3 text-sm text-fg shadow-[0_0_0_1px_rgba(74,222,128,0.08),0_2px_20px_rgba(0,0,0,0.4)]">
+            <div className="mx-auto flex max-w-2xl animate-fade-up items-center gap-3 rounded-xl border border-success/25 bg-success/[0.06] px-4 py-3 text-sm text-fg">
               <Check className="h-5 w-5 shrink-0 text-success" />
               <p className="min-w-0 break-words">
                 Le fichier{" "}
-                <span className="font-mono font-semibold">
+                <span className="font-semibold">
                   contacts_{search.siren}.csv
                 </span>{" "}
                 a été téléchargé.
@@ -464,15 +445,15 @@ export default function Page() {
           {search.status === "success" && search.contacts.length > 0 && (
             <>
               <div className="mb-5 animate-fade-up">
-                <p className="font-mono text-[11px] uppercase tracking-widest text-fg-muted">
+                <p className="text-sm font-medium text-orange-600">
                   Résultats
                 </p>
                 <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                  <h2 className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">
+                  <h2 className="text-2xl font-semibold text-navy sm:text-[1.75rem]">
                     Décideurs identifiés
                   </h2>
                   <p className="text-sm tabular-nums text-fg-muted">
-                    SIREN <span className="font-mono text-fg">{search.siren}</span>{" "}
+                    SIREN <span className="font-medium text-fg">{search.siren}</span>{" "}
                     · {search.contacts.length} contact
                     {search.contacts.length > 1 ? "s" : ""}
                   </p>
@@ -501,24 +482,19 @@ export default function Page() {
 /*  Sous-composants (même fichier, volontairement)                            */
 /* -------------------------------------------------------------------------- */
 
-/** Fond ambiant : gradient de base + blobs flottants + bruit + grille. */
+/** Fond : bandeau bleu clair en haut (coin arrondi façon invox.fr) + quelques
+ *  formes de marque flottantes, discrètes. */
 function AmbientBackground() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-ambient-base"
+      className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[min(620px,90vh)] overflow-hidden"
     >
-      {/* Blob principal — haut centre */}
-      <div className="absolute left-1/2 top-[-30%] h-[min(1400px,140vh)] w-[min(900px,120vw)] -translate-x-1/2 transform-gpu animate-float rounded-full bg-accent/25 blur-[90px] sm:blur-[150px]" />
-      {/* Blob secondaire — gauche, violet/rose */}
-      <div className="absolute left-[-20%] top-[20%] h-[min(800px,90vh)] w-[min(600px,80vw)] transform-gpu animate-float-slow rounded-full bg-gradient-to-br from-purple-500/15 to-pink-500/10 blur-[70px] sm:blur-[120px]" />
-      {/* Blob tertiaire — droite, indigo/bleu */}
-      <div className="absolute right-[-15%] top-[35%] h-[min(700px,80vh)] w-[min(500px,70vw)] transform-gpu animate-float rounded-full bg-gradient-to-bl from-indigo-500/12 to-blue-500/10 blur-[60px] [animation-delay:-4s] sm:blur-[100px]" />
-      {/* Accent bas — pulsation lente */}
-      <div className="absolute bottom-[-20%] left-1/2 h-[min(500px,60vh)] w-[min(800px,110vw)] -translate-x-1/2 transform-gpu animate-pulse-glow rounded-full bg-accent/10 blur-[70px] sm:blur-[120px]" />
-      {/* Bruit + grille */}
-      <div className="absolute inset-0 bg-noise opacity-[0.015]" />
-      <div className="absolute inset-0 bg-grid-64 opacity-[0.02]" />
+      <div className="absolute inset-0 rounded-br-[clamp(48px,10vw,120px)] bg-blue-50" />
+      {/* Formes réservées aux grands écrans : elles flanquent le titre sans le chevaucher. */}
+      <div className="absolute left-[7%] top-[20%] hidden h-16 w-16 animate-float rounded-full border-2 border-dashed border-blue-200 lg:block" />
+      <div className="absolute right-[9%] top-[12%] h-3.5 w-3.5 animate-float rounded-full bg-orange [animation-delay:-3s]" />
+      <div className="absolute right-[13%] top-[44%] hidden h-5 w-5 animate-float rounded-[5px] bg-yellow [animation-delay:-6s] lg:block" />
     </div>
   );
 }
@@ -552,10 +528,10 @@ function FormatOption({
       aria-checked={active}
       disabled={disabled}
       onClick={onClick}
-      className={`inline-flex min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-2 py-2 text-xs font-medium transition duration-200 ease-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed sm:gap-2 sm:px-3 sm:text-sm ${
+      className={`inline-flex min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-2 text-xs font-medium transition duration-200 ease-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue disabled:cursor-not-allowed sm:gap-2 sm:px-3 sm:text-sm ${
         active
-          ? "bg-white/[0.08] text-fg shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.1)]"
-          : "text-fg-muted hover:bg-white/[0.04] hover:text-fg"
+          ? "border-blue bg-white text-navy shadow-offset-sm"
+          : "border-transparent text-fg-muted hover:bg-white/70 hover:text-fg"
       }`}
     >
       <span className="hidden min-[420px]:contents">{icon}</span>
@@ -582,23 +558,19 @@ function ContactCard({
 
   return (
     <article
-      onMouseMove={trackSpotlight}
       style={{ animationDelay: `${index * 80}ms` }}
-      className="group relative flex animate-fade-up flex-col overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card transition duration-300 ease-expo hover:-translate-y-1 hover:border-border-hover hover:shadow-card-hover"
+      className="relative flex animate-fade-up flex-col rounded-xl border border-border bg-surface p-5 shadow-card transition duration-300 ease-expo hover:-translate-x-[3px] hover:-translate-y-[3px] hover:border-blue hover:shadow-offset"
     >
-      <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-      <span className="pointer-events-none absolute inset-0 bg-spotlight opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
       <div className="relative flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.1] to-white/[0.02] font-mono text-sm font-semibold text-fg shadow-inset-highlight">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-50 font-display text-base font-semibold text-blue-700">
           {initials(contact.firstName, contact.lastName)}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-base font-semibold tracking-tight text-fg">
+          <h3 className="truncate text-lg font-semibold leading-snug text-navy">
             {fullName}
           </h3>
           {contact.role && (
-            <span className="mt-1.5 inline-block max-w-full truncate rounded-full border border-white/[0.08] bg-white/[0.05] px-2.5 py-0.5 text-xs text-fg-muted">
+            <span className="mt-1 inline-block max-w-full truncate rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-600">
               {contact.role}
             </span>
           )}
@@ -609,21 +581,21 @@ function ContactCard({
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`Profil LinkedIn de ${fullName}`}
-            className="shrink-0 rounded-lg border border-transparent p-2 text-fg-muted transition duration-200 ease-expo hover:border-accent/30 hover:bg-accent/10 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+            className="shrink-0 rounded-lg p-2 text-blue transition duration-200 ease-expo hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue"
           >
             <LinkedinIcon className="h-[18px] w-[18px]" />
           </a>
         )}
       </div>
 
-      <div className="relative mt-4 border-t border-white/[0.06] pt-4">
+      <div className="relative mt-4 border-t border-blue-100 pt-4">
         {contact.email ? (
           <>
             <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 shrink-0 text-fg-muted" />
+              <Mail className="h-4 w-4 shrink-0 text-blue" />
               <a
                 href={`mailto:${contact.email}`}
-                className="min-w-0 flex-1 truncate text-sm text-fg-subtle underline-offset-4 transition-colors duration-200 hover:text-fg hover:underline"
+                className="min-w-0 flex-1 truncate text-sm text-ink underline-offset-4 transition-colors duration-200 hover:text-blue-700 hover:underline"
               >
                 {contact.email}
               </a>
@@ -631,10 +603,10 @@ function ContactCard({
                 type="button"
                 onClick={() => onCopy(contact.email!)}
                 aria-label={copied ? "Email copié" : "Copier l'email"}
-                className={`inline-flex min-w-[4.5rem] shrink-0 items-center justify-center gap-1 rounded-md border px-2 py-1 text-xs font-medium transition duration-200 ease-expo active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
+                className={`inline-flex min-w-[4.5rem] shrink-0 items-center justify-center gap-1 rounded-md border px-2 py-1 text-xs font-medium transition duration-200 ease-expo active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue ${
                   copied
                     ? "border-success/30 bg-success/10 text-success"
-                    : "border-white/[0.08] bg-white/[0.04] text-fg-muted hover:bg-white/[0.08] hover:text-fg"
+                    : "border-blue-200 bg-white text-navy hover:border-blue hover:bg-blue-50"
                 }`}
               >
                 {copied ? (
@@ -650,8 +622,8 @@ function ContactCard({
                 )}
               </button>
             </div>
-            <div className={`mt-2.5 flex items-center gap-2 text-xs ${quality.text}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${quality.dot}`} />
+            <div className={`mt-2.5 flex items-center gap-2 text-xs font-medium ${quality.text}`}>
+              <span className={`h-2 w-2 rounded-full ${quality.dot}`} />
               {quality.label}
             </div>
           </>
@@ -668,25 +640,24 @@ function ContactCard({
 
 function SkeletonCard() {
   return (
-    <div className="relative animate-pulse overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card">
-      <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+    <div className="relative animate-pulse rounded-xl border border-border bg-surface p-5 shadow-card">
       <div className="flex items-start gap-3">
-        <div className="h-11 w-11 shrink-0 rounded-xl bg-white/[0.08]" />
+        <div className="h-11 w-11 shrink-0 rounded-full bg-blue-50" />
         <div className="min-w-0 flex-1">
-          <div className="my-1 h-4 w-2/3 rounded bg-white/[0.08]" />
-          <div className="mt-1.5 h-[22px] w-1/3 rounded-full bg-white/[0.05]" />
+          <div className="my-1 h-4 w-2/3 rounded bg-blue-100" />
+          <div className="mt-1.5 h-[22px] w-1/3 rounded-full bg-blue-50" />
         </div>
-        <div className="h-[34px] w-[34px] shrink-0 rounded-lg bg-white/[0.05]" />
+        <div className="h-[34px] w-[34px] shrink-0 rounded-lg bg-blue-50" />
       </div>
-      <div className="mt-4 border-t border-white/[0.06] pt-4">
+      <div className="mt-4 border-t border-blue-100 pt-4">
         <div className="flex items-center gap-2">
-          <div className="h-4 w-4 shrink-0 rounded bg-white/[0.05]" />
-          <div className="h-4 flex-1 rounded bg-white/[0.08]" />
-          <div className="h-[26px] w-[4.5rem] shrink-0 rounded-md bg-white/[0.05]" />
+          <div className="h-4 w-4 shrink-0 rounded bg-blue-50" />
+          <div className="h-4 flex-1 rounded bg-blue-100" />
+          <div className="h-[26px] w-[4.5rem] shrink-0 rounded-md bg-blue-50" />
         </div>
         <div className="mt-2.5 flex items-center gap-2">
-          <div className="h-1.5 w-1.5 rounded-full bg-white/[0.08]" />
-          <div className="h-3 w-1/4 rounded bg-white/[0.05]" />
+          <div className="h-2 w-2 rounded-full bg-blue-100" />
+          <div className="h-3 w-1/4 rounded bg-blue-50" />
         </div>
       </div>
     </div>
@@ -695,17 +666,16 @@ function SkeletonCard() {
 
 function EmptyState({ siren }: { siren: string }) {
   return (
-    <div className="relative mx-auto flex max-w-md animate-scale-in flex-col items-center overflow-hidden rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-12 text-center">
-      <div className="absolute left-1/2 top-0 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/20 blur-[60px]" />
-      <div className="relative flex h-14 w-14 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.08] to-white/[0.02] shadow-inset-highlight">
-        <Users className="h-6 w-6 text-fg-muted" />
+    <div className="relative mx-auto flex max-w-md animate-scale-in flex-col items-center rounded-xl border-2 border-dashed border-blue-200 bg-white px-6 py-12 text-center">
+      <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-orange-50">
+        <Users className="h-6 w-6 text-orange" />
       </div>
-      <h2 className="relative mt-4 text-base font-semibold tracking-tight text-fg">
+      <h2 className="relative mt-4 text-xl font-semibold text-navy">
         Aucun décideur trouvé pour ce SIREN
       </h2>
       <p className="relative mt-1.5 text-sm text-fg-muted">
         Aucun contact n&apos;a pu être identifié pour{" "}
-        <span className="font-mono text-fg-subtle">{siren}</span>. Vérifiez le
+        <span className="font-medium text-fg">{siren}</span>. Vérifiez le
         numéro ou essayez une autre entreprise.
       </p>
     </div>

@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
+import { Gabarito, Poppins } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+// Typographies de la charte Invox : Gabarito (titres), Poppins (texte).
+const gabarito = Gabarito({
+  variable: "--font-gabarito",
   subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -24,9 +27,9 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${gabarito.variable} ${poppins.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-bg-base text-fg">
+      <body className="min-h-full flex flex-col bg-bg-base text-fg-body">
         {children}
       </body>
     </html>

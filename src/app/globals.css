@@ -1,81 +1,78 @@
 @import "tailwindcss";
 
 /* -------------------------------------------------------------------------- */
-/*  Design tokens — Linear / Modern                                           */
+/*  Design tokens — charte Invox (invox.fr)                                   */
+/*  Fond clair, bleu nuit, accents bleu / orange, ombres « décalées » franches */
 /*  Exposés en utilitaires Tailwind : bg-surface, text-fg-muted, shadow-card…  */
 /* -------------------------------------------------------------------------- */
 @theme {
-  --font-sans: var(--font-inter), "Geist Sans", system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-sans: var(--font-poppins), system-ui, sans-serif;
+  --font-display: var(--font-gabarito), var(--font-poppins), system-ui, sans-serif;
+
+  /* Palette de marque (presets WordPress d'invox.fr) */
+  --color-navy: #113c55; /* invox-blue-800 : titres, ombres décalées */
+  --color-ink: #004261; /* invox-darkblue : texte courant fort */
+  --color-blue: #3e9fd9; /* invox-blue : bordures CTA, accents */
+  --color-blue-50: #eaf5fb;
+  --color-blue-100: #d4eaf7;
+  --color-blue-200: #aad5ee;
+  --color-blue-700: #195a80; /* bleu lisible pour du texte sur blanc */
+  --color-orange: #f4704d; /* invox-orange : mot-clé mis en avant */
+  --color-orange-50: #feece7;
+  --color-orange-200: #f9b29f;
+  --color-orange-600: #c0330c;
+  --color-yellow: #f0d100;
 
   /* Canvas */
-  --color-bg-deep: #020203;
-  --color-bg-base: #050506;
-  --color-bg-elevated: #0a0a0c;
-  --color-bg-input: #0f0f12;
+  --color-bg-base: #ffffff;
+  --color-bg-soft: #f5f7f9;
+  --color-bg-input: #ffffff;
 
-  /* Surfaces & bordures (translucides) */
-  --color-surface: rgba(255, 255, 255, 0.05);
-  --color-surface-hover: rgba(255, 255, 255, 0.08);
-  --color-border: rgba(255, 255, 255, 0.06);
-  --color-border-hover: rgba(255, 255, 255, 0.1);
-  --color-border-accent: rgba(94, 106, 210, 0.3);
+  /* Surfaces & bordures */
+  --color-surface: #ffffff;
+  --color-border: #d4eaf7;
+  --color-border-hover: #aad5ee;
 
   /* Texte */
-  --color-fg: #ededef;
-  --color-fg-muted: #8a8f98;
-  --color-fg-subtle: rgba(255, 255, 255, 0.6);
+  --color-fg: #113c55;
+  --color-fg-body: #29333d;
+  --color-fg-muted: #536779;
 
   /* Accent */
-  --color-accent: #5e6ad2;
-  --color-accent-bright: #6872d9;
-  --color-accent-glow: rgba(94, 106, 210, 0.3);
+  --color-accent: #3e9fd9;
 
-  /* Sémantique (qualité email, erreurs) — désaturées pour le fond sombre */
-  --color-success: #4ade80;
-  --color-warning: #fbbf24;
-  --color-danger: #f87171;
+  /* Sémantique (qualité email, erreurs) — contrastes AA sur blanc */
+  --color-success: #15803d;
+  --color-warning: #a16207;
+  --color-danger: #c0330c;
 
-  /* Ombres multi-couches : liseré + diffuse + ambiance (+ glow accent) */
-  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 2px 20px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 0, 0, 0.2);
-  --shadow-card-hover: 0 0 0 1px rgba(255, 255, 255, 0.1),
-    0 8px 40px rgba(0, 0, 0, 0.5), 0 0 80px rgba(94, 106, 210, 0.1);
-  --shadow-cta: 0 0 0 1px rgba(94, 106, 210, 0.5),
-    0 4px 12px rgba(94, 106, 210, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  --shadow-cta-hover: 0 0 0 1px rgba(94, 106, 210, 0.6),
-    0 6px 24px rgba(94, 106, 210, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
-  --shadow-inset-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
-  --shadow-input: inset 0 1px 0 0 rgba(255, 255, 255, 0.04),
-    0 1px 2px rgba(0, 0, 0, 0.4);
+  /* Ombres : diffuse douce pour les cartes, « décalée » pour les éléments actifs */
+  --shadow-card: 0 1px 2px rgba(17, 60, 85, 0.06), 0 8px 24px rgba(17, 60, 85, 0.06);
+  --shadow-offset: 5px 5px 0 0 #113c55;
+  --shadow-offset-sm: 2px 2px 0 0 #113c55;
 
   /* Motion */
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --animate-float: float 9s ease-in-out infinite;
-  --animate-float-slow: float 12s ease-in-out infinite reverse;
-  --animate-pulse-glow: pulse-glow 6s ease-in-out infinite;
-  --animate-shimmer: shimmer 4s linear infinite;
+  --animate-float: float 8s ease-in-out infinite;
+  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
   --animate-fade-up: fade-up 600ms var(--ease-expo) both;
   --animate-scale-in: scale-in 600ms var(--ease-expo) both;
 
   @keyframes float {
     0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(1deg); }
+    50% { transform: translateY(-14px) rotate(2deg); }
   }
-  @keyframes pulse-glow {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
-  }
-  @keyframes shimmer {
-    to { background-position: 200% center; }
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
   }
   @keyframes fade-up {
     from { opacity: 0; transform: translateY(24px); }
     to { opacity: 1; transform: translateY(0); }
   }
   @keyframes scale-in {
-    from { opacity: 0; transform: scale(0.95); }
+    from { opacity: 0; transform: scale(0.97); }
     to { opacity: 1; transform: scale(1); }
   }
 }
@@ -84,87 +81,60 @@
 /*  Base                                                                      */
 /* -------------------------------------------------------------------------- */
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
   background-color: var(--color-bg-base);
-  color: var(--color-fg);
+  color: var(--color-fg-body);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+}
+
 ::selection {
-  background: rgba(94, 106, 210, 0.35);
-  color: var(--color-fg);
+  background: var(--color-blue-100);
+  color: var(--color-navy);
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Utilitaires composés (trop verbeux pour rester inline)                    */
+/*  Utilitaires composés                                                      */
 /* -------------------------------------------------------------------------- */
-@utility bg-ambient-base {
-  background: radial-gradient(ellipse at top, #0a0a0f 0%, #050506 50%, #020203 100%);
-}
 
-/* Bruit SVG très léger : évite le banding des gradients et donne du grain. */
-@utility bg-noise {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-@utility bg-grid-64 {
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 1) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 1) 1px, transparent 1px);
-  background-size: 64px 64px;
-}
-
-/* Titre : dégradé vertical blanc → blanc 70 % */
-@utility text-gradient-fg {
-  background-image: linear-gradient(to bottom, #fff, rgba(255, 255, 255, 0.95) 50%, rgba(255, 255, 255, 0.7));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Mot-clé accent : dégradé animé (shimmer) */
-@utility text-gradient-accent {
-  background-image: linear-gradient(to right, #5e6ad2, #818cf8, #5e6ad2);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Fond de carte : verre dégradé + liseré lumineux 1px en haut */
-@utility bg-card {
-  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-}
-
-/* Spotlight suivant la souris — position pilotée par --spot-x / --spot-y */
-@utility bg-spotlight {
-  background-image: radial-gradient(
-    300px circle at var(--spot-x, 50%) var(--spot-y, 50%),
-    rgba(94, 106, 210, 0.15),
-    transparent 60%
-  );
-}
-
-/* Balayage lumineux sur les CTA (pseudo-élément) */
-@utility btn-shine {
-  position: relative;
-  overflow: hidden;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.18) 50%, transparent 60%);
-    transform: translateX(-120%);
-    transition: transform 600ms var(--ease-expo);
-  }
+/* Bouton Invox : fond blanc, liseré bleu, ombre bleu nuit décalée qui
+   « s'enfonce » au survol et au clic. */
+@utility btn-invox {
+  border: 1px solid var(--color-blue);
+  border-radius: 8px;
+  background-color: #fff;
+  color: var(--color-navy);
+  box-shadow: var(--shadow-offset);
+  transition:
+    transform 200ms var(--ease-expo),
+    box-shadow 200ms var(--ease-expo),
+    background-color 200ms var(--ease-expo);
   @media (hover: hover) {
-    &:hover:not(:disabled)::after {
-      transform: translateX(120%);
+    &:hover:not(:disabled) {
+      transform: translate(3px, 3px);
+      box-shadow: var(--shadow-offset-sm);
+      background-color: var(--color-blue-50);
     }
+  }
+  &:active:not(:disabled) {
+    transform: translate(5px, 5px);
+    box-shadow: none;
+  }
+  &:disabled {
+    cursor: not-allowed;
+    border-color: var(--color-border);
+    color: var(--color-fg-muted);
+    background-color: var(--color-bg-soft);
+    box-shadow: none;
   }
 }
 
