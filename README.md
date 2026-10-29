@@ -31,23 +31,23 @@ npm run dev
 
 ## Configuration du webhook Make
 
-L'URL est lue depuis `NEXT_PUBLIC_MAKE_WEBHOOK_URL` (voir `.env.example`).
+Le navigateur appelle uniquement `/api/enrich` (`src/app/api/enrich/route.ts`),
+une route serveur qui valide la requête puis la relaie au webhook Make. L'URL du
+webhook est lue depuis `MAKE_WEBHOOK_URL` (voir `.env.example`), **sans** préfixe
+`NEXT_PUBLIC_` : elle n'est jamais exposée côté client, et le CORS n'entre pas en jeu.
 
-- **Test local sans Make** : `.env.local` pointe par défaut sur `/api/mock-make`,
-  une route de démo (`src/app/api/mock-make/route.ts`) qui simule la latence
-  (2,5 s) et renvoie 4 contacts fictifs.
+- **Local** : renseignez `MAKE_WEBHOOK_URL` dans `.env.local`.
+- **Vercel** : même variable dans les variables d'environnement du projet.
+- **Test sans Make** : `MAKE_WEBHOOK_URL=http://localhost:3000/api/mock-make`
+  utilise une route de démo (`src/app/api/mock-make/route.ts`) qui simule la
+  latence (2,5 s) et renvoie 4 contacts fictifs.
   - `000000000` ➔ tableau vide (empty state)
   - `500000000` ➔ erreur HTTP 500 (bannière d'erreur)
   - tout autre SIREN ➔ 4 contacts (UI) ou un CSV (mode CSV)
-- **Production** : remplacez la valeur par l'URL du webhook Make dans `.env.local`
-  (et dans les variables d'environnement Vercel), puis supprimez `src/app/api/mock-make`.
-
-> Le webhook Make doit accepter les requêtes cross-origin (CORS) depuis le domaine
-> de l'app, puisque le `fetch` est fait côté client.
 
 ## Contrat d'API
 
-`POST {WEBHOOK_URL}` · `Content-Type: application/json`
+`POST /api/enrich` (relayé tel quel vers le webhook Make) · `Content-Type: application/json`
 
 ```json
 { "siren": "123456789", "format": "ui" }

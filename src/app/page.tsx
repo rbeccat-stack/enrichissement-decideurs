@@ -24,8 +24,8 @@ import {
 /*  Config & types                                                            */
 /* -------------------------------------------------------------------------- */
 
-const WEBHOOK_URL =
-  process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL ?? "REMPLACER_PAR_URL_WEBHOOK_MAKE";
+// Proxy serveur (src/app/api/enrich) : l'URL du webhook Make n'est jamais exposée au navigateur.
+const ENRICH_ENDPOINT = "/api/enrich";
 
 const SIREN_REGEX = /^\d{9}$/;
 
@@ -149,30 +149,30 @@ export default function Page() {
     e.preventDefault();
     if (!canSubmit || inFlightRef.current) return;
 
-    if (!WEBHOOK_URL || WEBHOOK_URL.startsWith("REMPLACER")) {
-      setError(
-        "URL du webhook Make non configurée. Renseignez NEXT_PUBLIC_MAKE_WEBHOOK_URL dans .env.local.",
-      );
-      return;
-    }
-
     inFlightRef.current = true;
     setError(null);
     setSearch({ status: "loading", format });
 
     try {
       // Pas d'AbortController / timeout : Make peut mettre 10-15 s (scraping temps réel).
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch(ENRICH_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ siren, format }),
       });
 
       if (!response.ok) {
+        // Le proxy renvoie { error } pour ses propres erreurs (config, validation…).
+        const detail = await response
+          .json()
+          .then((data: { error?: unknown }) =>
+            typeof data?.error === "string" ? ` ${data.error}` : "",
+          )
+          .catch(() => "");
         throw new Error(
           `Le serveur a répondu ${response.status}${
             response.statusText ? ` (${response.statusText})` : ""
-          }.`,
+          }.${detail}`,
         );
       }
 
@@ -196,7 +196,7 @@ export default function Page() {
     } catch (err) {
       const message =
         err instanceof TypeError
-          ? "Impossible de joindre l'API. Vérifiez votre connexion ou la configuration CORS du webhook."
+          ? "Impossible de joindre l'API. Vérifiez votre connexion."
           : err instanceof Error
             ? err.message
             : "Une erreur inconnue est survenue.";
