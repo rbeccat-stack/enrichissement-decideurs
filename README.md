@@ -38,6 +38,13 @@ webhook est lue depuis `MAKE_WEBHOOK_URL` (voir `.env.example`), **sans** préfi
 
 - **Local** : renseignez `MAKE_WEBHOOK_URL` dans `.env.local`.
 - **Vercel** : même variable dans les variables d'environnement du projet.
+- **Vérification des intitulés** (optionnelle) : avec `SOCIETEINFO_API_KEY`, la
+  route relit la liste complète de l'entreprise en mode anonymisé (0 crédit) et
+  écarte les contacts dont Societeinfo a mal recopié l'intitulé (ex. un dirigeant
+  renvoyé avec le poste d'une chargée de marketing). Sans la variable, les
+  contacts sont renvoyés tels quels.
+- **CSV** : généré par la route à partir du JSON de Make (Make est toujours
+  appelé en `format: "ui"`), pour bénéficier de la même vérification.
 - **Test sans Make** : `MAKE_WEBHOOK_URL=http://localhost:3000/api/mock-make`
   utilise une route de démo (`src/app/api/mock-make/route.ts`) qui simule la
   latence (2,5 s) et renvoie 4 contacts fictifs.
