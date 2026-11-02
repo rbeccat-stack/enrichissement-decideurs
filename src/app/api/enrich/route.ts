@@ -79,8 +79,10 @@ export async function POST(req: Request) {
 
   let contacts: Contact[];
   try {
-    const text = await upstream.text();
-    contacts = text.trim() ? normalizeContacts(JSON.parse(text)) : [];
+    const text = (await upstream.text()).trim();
+    // Quand Societeinfo ne trouve aucun contact (404), le scénario n'atteint pas
+    // son module de réponse et Make renvoie son corps par défaut « Accepted ».
+    contacts = text && text !== "Accepted" ? normalizeContacts(JSON.parse(text)) : [];
   } catch {
     return NextResponse.json(
       { error: "Réponse inattendue du webhook Make (JSON invalide)." },
