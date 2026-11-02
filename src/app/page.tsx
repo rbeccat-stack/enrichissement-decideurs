@@ -40,10 +40,19 @@ type Contact = {
   email_test_result?: string | null;
 };
 
+/** Pourquoi le résultat est vide, d'après l'en-tête X-Enrich-Empty-Reason du proxy. */
+type EmptyReason = "no-contacts" | "no-match" | "unknown";
+
 type SearchState =
   | { status: "idle" }
   | { status: "loading"; format: OutputFormat }
-  | { status: "success"; siren: string; contacts: Contact[] }
+  | {
+      status: "success";
+      siren: string;
+      contacts: Contact[];
+      emptyReason?: EmptyReason;
+      knownContacts?: number;
+    }
   | { status: "downloaded"; siren: string };
 
 /* -------------------------------------------------------------------------- */
@@ -176,7 +185,20 @@ export default function Page() {
         );
       }
 
+      const emptyHeader = response.headers.get("X-Enrich-Empty-Reason");
+      const emptyReason: EmptyReason | undefined =
+        emptyHeader === "no-contacts" || emptyHeader === "no-match" || emptyHeader === "unknown"
+          ? emptyHeader
+          : undefined;
+      const knownHeader = Number(response.headers.get("X-Enrich-Known-Contacts"));
+      const knownContacts = Number.isFinite(knownHeader) && knownHeader > 0 ? knownHeader : undefined;
+
       if (format === "csv") {
+        // Pas de fichier vide : on explique plutôt pourquoi rien n'a été trouvé.
+        if (emptyReason) {
+          setSearch({ status: "success", siren, contacts: [], emptyReason, knownContacts });
+          return;
+        }
         const blob = await response.blob();
         triggerDownload(blob, `contacts_${siren}.csv`);
         setSearch({ status: "downloaded", siren });
@@ -192,7 +214,13 @@ export default function Page() {
           throw new Error("Réponse inattendue du serveur (JSON invalide).");
         }
       }
-      setSearch({ status: "success", siren, contacts: normalizeContacts(payload) });
+      setSearch({
+        status: "success",
+        siren,
+        contacts: normalizeContacts(payload),
+        emptyReason,
+        knownContacts,
+      });
     } catch (err) {
       const message =
         err instanceof TypeError
@@ -439,7 +467,11 @@ export default function Page() {
           )}
 
           {search.status === "success" && search.contacts.length === 0 && (
-            <EmptyState siren={search.siren} />
+            <EmptyState
+              siren={search.siren}
+              reason={search.emptyReason}
+              knownContacts={search.knownContacts}
+            />
           )}
 
           {search.status === "success" && search.contacts.length > 0 && (
@@ -664,20 +696,51 @@ function SkeletonCard() {
   );
 }
 
-function EmptyState({ siren }: { siren: string }) {
+function EmptyState({
+  siren,
+  reason,
+  knownContacts,
+}: {
+  siren: string;
+  reason?: EmptyReason;
+  knownContacts?: number;
+}) {
+  const sirenTag = <span className="font-medium text-fg">{siren}</span>;
+  let title = "Aucun décideur trouvé pour ce SIREN";
+  let body: ReactNode = (
+    <>
+      Aucun contact n&apos;a pu être identifié pour {sirenTag}. Vérifiez le
+      numéro ou essayez une autre entreprise.
+    </>
+  );
+
+  if (reason === "no-contacts") {
+    title = "Entreprise absente de la base de contacts";
+    body = (
+      <>
+        La recherche a bien fonctionné, mais Societeinfo ne référence encore
+        aucun salarié pour {sirenTag}. C&apos;est fréquent pour les petites
+        structures et les établissements locaux.
+      </>
+    );
+  } else if (reason === "no-match") {
+    title = "Aucun profil marketing dans cette entreprise";
+    body = (
+      <>
+        Societeinfo connaît {knownContacts ? `${knownContacts} contact${knownContacts > 1 ? "s" : ""}` : "des contacts"}{" "}
+        chez {sirenTag}, mais aucun n&apos;occupe un poste marketing,
+        growth ou communication avec un email vérifié.
+      </>
+    );
+  }
+
   return (
     <div className="relative mx-auto flex max-w-md animate-scale-in flex-col items-center rounded-xl border-2 border-dashed border-blue-200 bg-white px-6 py-12 text-center">
       <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-orange-50">
         <Users className="h-6 w-6 text-orange" />
       </div>
-      <h2 className="relative mt-4 text-xl font-semibold text-navy">
-        Aucun décideur trouvé pour ce SIREN
-      </h2>
-      <p className="relative mt-1.5 text-sm text-fg-muted">
-        Aucun contact n&apos;a pu être identifié pour{" "}
-        <span className="font-medium text-fg">{siren}</span>. Vérifiez le
-        numéro ou essayez une autre entreprise.
-      </p>
+      <h2 className="relative mt-4 text-xl font-semibold text-navy">{title}</h2>
+      <p className="relative mt-1.5 text-pretty text-sm text-fg-muted">{body}</p>
     </div>
   );
 }

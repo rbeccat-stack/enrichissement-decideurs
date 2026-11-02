@@ -90,18 +90,29 @@ export async function POST(req: Request) {
     );
   }
 
-  contacts = await dropMislabeledContacts(siren, contacts);
+  const reference = await fetchReferenceContacts(siren);
+  contacts = dropMislabeledContacts(contacts, reference);
+
+  // Résultat vide : on indique au client pourquoi, pour qu'il l'explique au lieu
+  // d'avoir l'air en panne. « no-contacts » = Societeinfo ne connaît personne dans
+  // l'entreprise ; « no-match » = des contacts existent, mais aucun ne correspond.
+  const headers: Record<string, string> = { "Cache-Control": "no-store" };
+  if (contacts.length === 0) {
+    headers["X-Enrich-Empty-Reason"] =
+      reference === null ? "unknown" : reference.length === 0 ? "no-contacts" : "no-match";
+    if (reference) headers["X-Enrich-Known-Contacts"] = String(reference.length);
+  }
 
   if (format === "csv") {
     return new NextResponse(toCsv(contacts), {
       headers: {
+        ...headers,
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": `attachment; filename="contacts_${siren}.csv"`,
-        "Cache-Control": "no-store",
       },
     });
   }
-  return NextResponse.json(contacts, { headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json(contacts, { headers });
 }
 
 /** Make peut renvoyer un tableau brut ou un objet enveloppant le tableau. */
@@ -117,17 +128,12 @@ function normalizeContacts(payload: unknown): Contact[] {
 }
 
 /**
- * Societeinfo attribue parfois, dans une recherche filtrée par intitulé, le poste
- * d'une autre personne à un contact (ex. le dirigeant de Locabri renvoyé comme
- * « Chargée de marketing et communication »). On relit la liste complète de
- * l'entreprise en mode anonymisé (0 crédit, intitulés et identifiants intacts)
- * et on écarte les contacts dont le vrai intitulé diffère.
- *
- * En cas d'échec de la vérification, on renvoie les contacts tels quels : mieux
- * vaut un résultat non vérifié qu'une recherche (déjà payée) perdue.
+ * Liste complète des contacts de l'entreprise, lue en mode anonymisé (0 crédit,
+ * intitulés et identifiants intacts). Renvoie [] si Societeinfo ne connaît aucun
+ * contact, et null si la lecture est impossible (clé absente, erreur réseau…).
  */
-async function dropMislabeledContacts(siren: string, contacts: Contact[]) {
-  if (!SOCIETEINFO_API_KEY || contacts.length === 0) return contacts;
+async function fetchReferenceContacts(siren: string): Promise<Contact[] | null> {
+  if (!SOCIETEINFO_API_KEY) return null;
 
   const url = new URL(`https://societeinfo.com/app/rest/api/v2/contacts.json/${siren}`);
   url.searchParams.set("key", SOCIETEINFO_API_KEY);
@@ -136,20 +142,38 @@ async function dropMislabeledContacts(siren: string, contacts: Contact[]) {
 
   try {
     const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(15_000) });
+    // Societeinfo répond 404 + API_CONTACT_NOT_FOUND quand l'entreprise n'a aucun contact.
+    if (response.status === 404) {
+      const data = (await response.json().catch(() => null)) as { errorCode?: string } | null;
+      if (data?.errorCode === "API_CONTACT_NOT_FOUND") return [];
+    }
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const reference = normalizeContacts(await response.json());
-    const trueRoles = new Map(reference.map((c) => [String(c.id), c.role]));
-
-    return contacts.filter((contact) => {
-      const id = String(contact.id);
-      // Contact absent de la référence (liste tronquée…) : on ne peut pas trancher, on garde.
-      if (!trueRoles.has(id)) return true;
-      return trueRoles.get(id) === contact.role;
-    });
+    return normalizeContacts(await response.json());
   } catch (err) {
-    console.warn(`[enrich] Vérification des intitulés impossible pour ${siren} :`, err);
-    return contacts;
+    console.warn(`[enrich] Lecture de la liste de référence impossible pour ${siren} :`, err);
+    return null;
   }
+}
+
+/**
+ * Societeinfo attribue parfois, dans une recherche filtrée par intitulé, le poste
+ * d'une autre personne à un contact (ex. le dirigeant de Locabri renvoyé comme
+ * « Chargée de marketing et communication »). On écarte les contacts dont le vrai
+ * intitulé, dans la liste de référence, diffère.
+ *
+ * Sans référence, on renvoie les contacts tels quels : mieux vaut un résultat non
+ * vérifié qu'une recherche (déjà payée) perdue.
+ */
+function dropMislabeledContacts(contacts: Contact[], reference: Contact[] | null) {
+  if (!reference || reference.length === 0) return contacts;
+  const trueRoles = new Map(reference.map((c) => [String(c.id), c.role]));
+
+  return contacts.filter((contact) => {
+    const id = String(contact.id);
+    // Contact absent de la référence (liste tronquée…) : on ne peut pas trancher, on garde.
+    if (!trueRoles.has(id)) return true;
+    return trueRoles.get(id) === contact.role;
+  });
 }
 
 function toCsv(contacts: Contact[]) {
